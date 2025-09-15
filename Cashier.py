@@ -6,14 +6,6 @@ import time
 import threading
 from datetime import datetime
 
-# Start the customer display when POS launches (keep this functionality)
-def launch_customer_display():
-    subprocess.Popen([sys.executable, 'Kitchen_Pos.py'])
-    subprocess.Popen([sys.executable, 'test.py'])
-
-# Launch customer display
-launch_customer_display()
-
 class FastFoodPOS:
     def __init__(self):
         self.running = True
