@@ -28,7 +28,7 @@ class FastFoodPOS:
             "IceCream_cup": {
                 "Super_boba_sundae": 45.00,
                 "Super_mango_sundae": 40.00,
-                "Oreo_sundae": 3.99,
+                "Oreo_sundae": 35.00,
                 "Super_strawberry_sundae": 30.00
             },
             "Dessert": {
@@ -82,7 +82,7 @@ class FastFoodPOS:
         self.subtotal = 0.0
         self.tax_rate = 0.08
         
-        # AI drive-through mode
+        '''# AI drive-through mode
         self.ai_mode = True  # Set default to ON for better usability
         self.ai_order_active = False
         
@@ -90,12 +90,12 @@ class FastFoodPOS:
         self.ai_thread_running = True
         
         # Start the AI order monitoring thread
-        self.start_ai_monitoring_thread()
+        self.start_ai_monitoring_thread()'''
         
         # Run the main loop
         self.main_loop()
     
-    def start_ai_monitoring_thread(self):
+    '''    def start_ai_monitoring_thread(self):
         """Start a background thread to check for AI orders"""
         print("Starting AI order monitoring thread...")
         self.ai_thread = threading.Thread(target=self.ai_order_monitor_loop)
@@ -111,14 +111,14 @@ class FastFoodPOS:
                 time.sleep(0.5)  # Check every 0.5 seconds
             except Exception as e:
                 print(f"Error in AI monitoring thread: {e}")
-                time.sleep(1)  # Wait a bit longer on error
+                time.sleep(1)  # Wait a bit longer on error'''
     
     def display_menu(self):
         """Display the main menu options"""
         print("\n" + "="*50)
         print(" "*15 + "FAST FOOD POS SYSTEM" + " "*15)
-        if self.ai_order_active:
-            print(" "*10 + "[ ACTIVE AI DRIVE-THROUGH ORDER ]" + " "*10)
+        '''if self.ai_order_active:
+            print(" "*10 + "[ ACTIVE AI DRIVE-THROUGH ORDER ]" + " "*10)'''
         print("="*50)
         print("1. View Categories")
         print("2. View Current Order")
@@ -656,7 +656,7 @@ class FastFoodPOS:
         if not os.path.exists("orders"):
             os.makedirs("orders")
         
-        order_file = os.path.join("orders", f"order_{self.order_id}_{datetime.now().strftime("%Y-%m-%d%H%M%S")}.json")
+        order_file = os.path.join("orders", f"order_{self.order_id}_{datetime.now().strftime('%Y-%m-%d%H%M%S')}.json")
         with open(order_file, 'w') as f:
             json.dump(receipt, f, indent=2, default=str)
         
@@ -678,7 +678,7 @@ class FastFoodPOS:
         """Main program loop"""
         print("\nWelcome to Fast Food POS System!")
         print("For quick order help, type: +help")
-        print(f"AI Drive-Through Mode: {'ON' if self.ai_mode else 'OFF'}")
+        #print(f"AI Drive-Through Mode: {'ON' if self.ai_mode else 'OFF'}")
         print("System is now monitoring for AI drive-through orders...")
         
         while self.running:
