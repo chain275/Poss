@@ -14,9 +14,9 @@ class FastFoodPOS:
         self.menu_data = {
             "Milk_tea": {
                 "Classical_milk_tea": 30.00,
-                "Toffee_hazelnut_milk_tea": 35.00,
+                "Pandan_milk_tea": 35.00,
                 "Brown_sugar_milk_tea": 40.00,
-                "Tripple_milk_tea": 50.00,
+                "Mango_milk_tea": 50.00,
                 "Starwberry_creamy_tea": 45.00
             },
             "Fruit_tea": {
@@ -39,18 +39,18 @@ class FastFoodPOS:
         # Ingredients for customization
         self.ingredients = {
             "Milk_tea": {
-                "Size": ["Regular size", "Large size (+$0.50)", "Extra Large size (+$1.00)"],
+                "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
                 "Ice": ["Regular Ice", "Light Ice", "Extra Ice"],
                 "Sugar": ["50%", "70%", "100%"],
                 "Toppings": ["No Extras", "Cookies", "Bubble Pearl", "Coconut jelly", "Brown sugar jelly"]
             },
             "Fruit_tea": {
-                "Size": ["Regular size", "Large size (+$0.50)", "Extra Large size (+$1.00)"],
+                "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
                 "Ice": ["Regular Ice", "Light Ice", "Extra Ice"],
                 "Sugar": ["50%", "70%", "100%"]
             },
             "IceCream_cup": {
-                "Size": ["Regular size", "Large size (+$0.50)", "Extra Large size (+$1.00)"],
+                "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
             },
             "Dessert": {
             },
@@ -82,7 +82,7 @@ class FastFoodPOS:
         self.subtotal = 0.0
         self.tax_rate = 0.08
         
-        '''# AI drive-through mode
+        # AI drive-through mode
         self.ai_mode = True  # Set default to ON for better usability
         self.ai_order_active = False
         
@@ -90,12 +90,12 @@ class FastFoodPOS:
         self.ai_thread_running = True
         
         # Start the AI order monitoring thread
-        self.start_ai_monitoring_thread()'''
+        self.start_ai_monitoring_thread()
         
         # Run the main loop
         self.main_loop()
     
-    '''    def start_ai_monitoring_thread(self):
+    def start_ai_monitoring_thread(self):
         """Start a background thread to check for AI orders"""
         print("Starting AI order monitoring thread...")
         self.ai_thread = threading.Thread(target=self.ai_order_monitor_loop)
@@ -111,14 +111,14 @@ class FastFoodPOS:
                 time.sleep(0.5)  # Check every 0.5 seconds
             except Exception as e:
                 print(f"Error in AI monitoring thread: {e}")
-                time.sleep(1)  # Wait a bit longer on error'''
+                time.sleep(1)  # Wait a bit longer on error
     
     def display_menu(self):
         """Display the main menu options"""
         print("\n" + "="*50)
         print(" "*15 + "FAST FOOD POS SYSTEM" + " "*15)
-        '''if self.ai_order_active:
-            print(" "*10 + "[ ACTIVE AI DRIVE-THROUGH ORDER ]" + " "*10)'''
+        if self.ai_order_active:
+            print(" "*10 + "[ ACTIVE AI DRIVE-THROUGH ORDER ]" + " "*10)
         print("="*50)
         print("1. View Categories")
         print("2. View Current Order")
@@ -299,19 +299,15 @@ class FastFoodPOS:
                     
                 # Parse command: +add <item_name> <size> <ice> <toppings> <Sugar>
                 parts = order_cmd.split()
-                if len(parts) < 2:
+                '''                if len(parts) < 2:
                     print(f"Error: Invalid quick order command: '{order_cmd}'")
-                    continue
-                
+                    continue'''
+
                 item_name = parts[1]
                 
                 # Find the item in menu
                 item_category = None
                 item_price = 0
-                topping = True
-                ice = True
-                sugar = True
-                size = True
                 for category, items in self.menu_data.items():
                     if item_name in items:
                         item_category = category
@@ -322,13 +318,13 @@ class FastFoodPOS:
                         topping = self.ingredients[item_category].get("Toppings", False)
                         break
                 
+                parts.extend('-'*((6)-(len(parts))))
+                print(topping)
+                
+
                 if item_category is None :
                     print(f"Error: Item '{item_name}' not found in menu.")
                     continue
-                
-                '''if item_category != "Milk_tea":
-                    print(f"Error: Quick order with customization is only available for burgers.")
-                    continue'''
                 
                 # Initialize customizations
                 selected_customizations = {}
@@ -370,11 +366,19 @@ class FastFoodPOS:
                                 except ValueError:
                                     pass
                 
-                # Process toppings (arg3)
+                # Process sugar (arg3)
+                if sugar:
+                    selected_customizations["Sugar"] = "Full sugar" # Default
+                    if len(parts) > 4 and parts[4] != "-":
+                        sugar_code = parts[4]
+                        if sugar_code in self.Sugar_shortcuts:
+                            selected_customizations["Sugar"] = self.Sugar_shortcuts[sugar_code]
+
+                # Process toppings (arg4)
                 if topping:
                     selected_customizations["Toppings"] = [] # Default
-                    if len(parts) > 4 and parts[4] != "-":
-                        topping_codes = parts[4]
+                    if len(parts) > 5:
+                        topping_codes = parts[5]
                         available_toppings = self.ingredients["Milk_tea"]["Toppings"]
                         
                         # Map single letters to toppings
@@ -388,14 +392,6 @@ class FastFoodPOS:
                         for code in topping_codes:
                             if code in topping_map and topping_map[code] in available_toppings:
                                 selected_customizations["Toppings"].append(topping_map[code])
-                
-                # Process sugar (arg4)
-                if sugar:
-                    selected_customizations["Sugar"] = "Full sugar" # Default
-                    if len(parts) > 5 and parts[5] != "-":
-                        sugar_code = parts[5]
-                        if sugar_code in self.Sugar_shortcuts:
-                            selected_customizations["Sugar"] = self.Sugar_shortcuts[sugar_code]
                 
                 # Calculate total price
                 item_total = item_price + additional_cost
@@ -417,7 +413,6 @@ class FastFoodPOS:
                 # Display order summary
                 print(f"\n{item_name} added to order with customizations:")
                 for section, selection in selected_customizations.items():
-                    print(f'# {selection}')
                     if isinstance(selection, list):
                         if selection:
                             print(f"- {section}: {', '.join(selection)}")
@@ -678,7 +673,7 @@ class FastFoodPOS:
         """Main program loop"""
         print("\nWelcome to Fast Food POS System!")
         print("For quick order help, type: +help")
-        #print(f"AI Drive-Through Mode: {'ON' if self.ai_mode else 'OFF'}")
+        print(f"AI Drive-Through Mode: {'ON' if self.ai_mode else 'OFF'}")
         print("System is now monitoring for AI drive-through orders...")
         
         while self.running:
@@ -720,7 +715,7 @@ class FastFoodPOS:
                 os.system('cls')
                 print("Invalid choice. Please try again.")
     
-'''    def check_for_ai_orders(self):
+    def check_for_ai_orders(self):
         """Check for AI orders and process them"""
         # Only process AI orders if in AI mode
         if not self.ai_mode:
@@ -740,15 +735,15 @@ class FastFoodPOS:
             if os.path.exists(path):
                 try:
                     with open(path, 'r') as file:
-                        command = file.read().strip()
+                        command_list = file.read().strip().splitlines()
                     file_path_used = path
                     break
                 except Exception as e:
                     print(f"Error reading AI order file {path}: {e}")
         
         # If we found a command, process it
-        if command and file_path_used:
-            print(f"Found AI command: {command}")
+        if command_list and file_path_used:
+            print(f"Found AI command: {command_list}")
             
             # Clear the file to prevent reprocessing the same command
             try:
@@ -759,43 +754,49 @@ class FastFoodPOS:
             
             # Process the command
             try:
-                if command.startswith("+add"):
-                    self.process_quick_order(command)
-                    self.ai_order_active = True
-                    print("AI order started or updated")
-                    
-                    # Create a file to indicate there's an active order
-                    with open(os.path.join("Server", "active_ai_order.txt"), 'w') as f:
-                        f.write("1")
+                for command in command_list:
+                    if command.startswith("+add"):
+                        self.process_quick_order(command)
+                        self.ai_order_active = True
+                        print("AI order started or updated")
                         
-                elif command.startswith("+Remove") or command.startswith("+remove"):
-                    # Extract the item number (assuming format is "+Remove 1")
-                    parts = command.split()
-                    if len(parts) > 1 and parts[1].isdigit():
-                        self.remove(parts[1])
-                        print(f"AI order: removed item {parts[1]}")
+                        # Create a file to indicate there's an active order
+                        with open(os.path.join("Server", "active_ai_order.txt"), 'w') as f:
+                            f.write("1")
+
+                    elif command.startswith("+clear"):
+                        self.current_order = []
+                        print("\nOrder cleared successfully!")
+                        self.update_order_summary()
+
+                    elif command.startswith("+Remove") or command.startswith("+remove"):
+                        # Extract the item number (assuming format is "+Remove 1")
+                        parts = command.split()
+                        if len(parts) > 1 and parts[1].isdigit():
+                            self.remove(parts[1])
+                            print(f"AI order: removed item {parts[1]}")
+                        else:
+                            print("Invalid remove command format from AI")
+                            
+                    elif command.startswith("+finish"):
+                        if self.ai_order_active:
+                            print("AI order: finishing order and processing payment")
+                            self.process_payment(payment_method="AI Drive-Through", auto_process=True)
+                            self.ai_order_active = False
+                            
+                            # Remove the active order indicator
+                            try:
+                                os.remove(os.path.join("Server", "active_ai_order.txt"))
+                            except:
+                                pass
+                        else:
+                            print("No active AI order to finish")
+                            
                     else:
-                        print("Invalid remove command format from AI")
-                        
-                elif command.startswith("+finish"):
-                    if self.ai_order_active:
-                        print("AI order: finishing order and processing payment")
-                        self.process_payment(payment_type="AI Drive-Through", auto_process=True)
-                        self.ai_order_active = False
-                        
-                        # Remove the active order indicator
-                        try:
-                            os.remove(os.path.join("Server", "active_ai_order.txt"))
-                        except:
-                            pass
-                    else:
-                        print("No active AI order to finish")
-                        
-                else:
-                    print(f"Unknown AI command: {command}")
+                        print(f"Unknown AI command: {command}")
                     
             except Exception as e:
-                print(f"Error processing AI command '{command}': {e}")'''
+                print(f"Error processing AI command '{command}': {e}")
 
 # Run the application
 if __name__ == "__main__":
