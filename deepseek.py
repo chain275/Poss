@@ -36,9 +36,16 @@ def execute_server_command(command):
             os.makedirs("Server")
         
         command = command.replace('/','\n')
+
+        command_cleaning = ''
+
+        for i in command.split('\n'):
+            command_cleaning += f'{i.strip()}\n'
+
+
             
         with open(order_file, 'w') as f:
-            f.write(f'{command}')
+            f.write(f'{command_cleaning}')
         
         print(f"Server command received: {command}")
     

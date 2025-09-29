@@ -14,6 +14,7 @@ class FastFoodPOS:
     def __init__(self):
         self.running = True
         
+        
         # Menu data structure
         self.menu_data = db.fetch_menu_data()
 
@@ -48,6 +49,9 @@ class FastFoodPOS:
     
     def start_ai_monitoring_thread(self):
         """Start a background thread to check for AI orders"""
+        path = os.path.join(os.getcwd(), "Server", "AI_order_command.txt")
+        with open(path, 'w') as file:
+            file.write("")
         print("Starting AI order monitoring thread...")
         self.ai_thread = threading.Thread(target=self.ai_order_monitor_loop)
         self.ai_thread.daemon = True  # Thread will exit when main program exits
@@ -680,8 +684,10 @@ class FastFoodPOS:
         
         command = None
         file_path_used = None
+
         
         # Try to read from any of the possible file paths
+
         for path in file_paths:
             if os.path.exists(path):
                 try:
@@ -693,6 +699,7 @@ class FastFoodPOS:
                     print(f"Error reading AI order file {path}: {e}")
         
         # If we found a command, process it
+
         if command_list and file_path_used:
             print(f"Found AI command: {command_list}")
             
