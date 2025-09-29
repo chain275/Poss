@@ -17,7 +17,7 @@ You are a friendly, efficient Thai-speaking drive-through operator at Kmitl icec
     "Pandan_milk_tea": 35.00, #ชานมใบเตย
     "Brown_sugar_milk_tea": 40.00, #ชานมบราวชูก้า
     "Mango_milk_tea": 50.00, #ชานมมะม่วง
-    "Starwberry_creamy_tea": 45.00 #ชานมสตรอว์เบอร์รี
+    "Strawberry_creamy_tea": 45.00 #ชานมสตรอว์เบอร์รี
 }
 "Fruit_tea": { # ชาผลไม่้
     "Kiwi_jasmin": 35.00,  #ชากีวี่
@@ -25,6 +25,14 @@ You are a friendly, efficient Thai-speaking drive-through operator at Kmitl icec
     "Lemon_black_tea": 30.00, #ชามะนาวดำ
     "Mango_tea": 25.00 #ชามะม่วง
 },
+
+"IceCream_cup": {
+	"Super_boba_sundae": 45.00,
+	"Super_mango_sundae": 40.00,
+	"Oreo_sundae": 35.00,
+	"Super_strawberry_sundae": 30.00
+},
+
 ```
 
 Size = {
@@ -48,6 +56,13 @@ Sugar = {
 
 
 ## Order Command System
+
+- Customization with each type
+  - Milk_tea : Size,Ice,Sugar
+  - Fruit_tea : Size,Ice,Sugar
+  - IceCream_cup : Size
+
+
 
 - **+add <ENG_item_name> <Size> <Ice> <Sugar>** - Add items to cart
   - Example: `+add Mango_milk_tea L L 70`

@@ -5,75 +5,26 @@ import subprocess
 import time
 import threading
 from datetime import datetime
+import db_manager
+
+db = db_manager.db_manager()
+
 
 class FastFoodPOS:
     def __init__(self):
         self.running = True
         
         # Menu data structure
-        self.menu_data = {
-            "Milk_tea": {
-                "Classical_milk_tea": 30.00,
-                "Pandan_milk_tea": 35.00,
-                "Brown_sugar_milk_tea": 40.00,
-                "Mango_milk_tea": 50.00,
-                "Starwberry_creamy_tea": 45.00
-            },
-            "Fruit_tea": {
-                "Kiwi_jasmin": 35.00,
-                "Lemonade_tea": 25.00,
-                "Lemon_black_tea": 30.00,
-                "Mango_tea": 25.00
-            },
-            "IceCream_cup": {
-                "Super_boba_sundae": 45.00,
-                "Super_mango_sundae": 40.00,
-                "Oreo_sundae": 35.00,
-                "Super_strawberry_sundae": 30.00
-            },
-            "Dessert": {
-                "Ice_Cream": 15.00,
-            }
-        }
-        
+        self.menu_data = db.fetch_menu_data()
+
         # Ingredients for customization
-        self.ingredients = {
-            "Milk_tea": {
-                "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
-                "Ice": ["Regular Ice", "Light Ice", "Extra Ice"],
-                "Sugar": ["50%", "70%", "100%"],
-                "Toppings": ["No Extras", "Cookies", "Bubble Pearl", "Coconut jelly", "Brown sugar jelly"]
-            },
-            "Fruit_tea": {
-                "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
-                "Ice": ["Regular Ice", "Light Ice", "Extra Ice"],
-                "Sugar": ["50%", "70%", "100%"]
-            },
-            "IceCream_cup": {
-                "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
-            },
-            "Dessert": {
-            },
-
-        }
+        self.ingredients = db.fetch_customization_data()
         
-        self.Size_shortcuts = {
-            "R": "Regular size",
-            "L": "Large size (+$0.50)",
-            "EL": "Extra Large size (+$1.00)",
-        }
+        self.Size_shortcuts = db.get_size_shortcuts()
 
-        self.Ice_shortcuts = {
-            "R": "Regular Ice",
-            "L": "Light Ice",
-            "E": "Extra Ice",
-        }
+        self.Ice_shortcuts = db.get_ice_shortcuts()
 
-        self.Sugar_shortcuts = {
-            "50": "50%",
-            "70": "70%",
-            "100": "100%",
-        }
+        self.Sugar_shortcuts = db.get_sugar_shortcuts()
 
         # Current order
         self.current_order = []
@@ -375,7 +326,7 @@ class FastFoodPOS:
                             selected_customizations["Sugar"] = self.Sugar_shortcuts[sugar_code]
 
                 # Process toppings (arg4)
-                if topping:
+                '''if topping:
                     selected_customizations["Toppings"] = [] # Default
                     if len(parts) > 5:
                         topping_codes = parts[5]
@@ -391,7 +342,7 @@ class FastFoodPOS:
                         
                         for code in topping_codes:
                             if code in topping_map and topping_map[code] in available_toppings:
-                                selected_customizations["Toppings"].append(topping_map[code])
+                                selected_customizations["Toppings"].append(topping_map[code])'''
                 
                 # Calculate total price
                 item_total = item_price + additional_cost
