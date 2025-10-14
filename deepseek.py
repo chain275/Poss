@@ -6,7 +6,7 @@ keyy = str(input('Api key: '))
 
 location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')   
 
-with open(location, 'r') as file:
+with open(location, 'r',encoding="utf-8") as file:
     prompt = file.read()
 
 def Json_cleaning(Your_json):
