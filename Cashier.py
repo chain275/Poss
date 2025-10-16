@@ -270,11 +270,9 @@ class FastFoodPOS:
                         size = self.ingredients[item_category].get("Size", False)
                         ice = self.ingredients[item_category].get("Ice", False)
                         sugar = self.ingredients[item_category].get("Sugar", False)
-                        topping = self.ingredients[item_category].get("Toppings", False)
                         break
                 
                 parts.extend('-'*((6)-(len(parts))))
-                print(topping)
                 
 
                 if item_category is None :
@@ -697,8 +695,6 @@ class FastFoodPOS:
                     break
                 except Exception as e:
                     print(f"Error reading AI order file {path}: {e}")
-        
-        # If we found a command, process it
 
         if command_list and file_path_used:
             print(f"Found AI command: {command_list}")
@@ -728,7 +724,6 @@ class FastFoodPOS:
                         self.update_order_summary()
 
                     elif command.startswith("+Remove") or command.startswith("+remove"):
-                        # Extract the item number (assuming format is "+Remove 1")
                         parts = command.split()
                         if len(parts) > 1 and parts[1].isdigit():
                             self.remove(parts[1])

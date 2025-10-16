@@ -1,12 +1,19 @@
 import os,json
 import time,subprocess
 from openai import OpenAI
+from ASR import Recorder,Asr
 
-keyy = str(input('Api key: '))
+key1 = str(input('LLM Api key: '))
+key2 = str(input('ASR Api key: '))
+
+
+deepseek_api = OpenAI(api_key=key1, base_url="https://api.deepseek.com")
+asr_api = OpenAI(api_key=key2,base_url="https://api.opentyphoon.ai/v1")
 
 location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')   
+recorder = Recorder.SentenceRecorder(silence_threshold=1000,pause_duration=1.75,sample_rate=44100,output_dir="recordings")
 
-with open(location, 'r',encoding="utf-8") as file:
+with open(location, 'r',encoding='utf-8') as file:
     prompt = file.read()
 
 def Json_cleaning(Your_json):
@@ -51,11 +58,12 @@ def execute_server_command(command):
     
 
 
+
 class OpenAICLI:
-    def __init__(self):
+    def __init__(self,deepseek_api):
         if not os.path.exists("Server"):
             os.makedirs("Server")
-        self.client = OpenAI(api_key=keyy, base_url="https://api.deepseek.com")
+        self.client = deepseek_api
         if not self.client.api_key:
             raise ValueError("Please set OPENAI_API_KEY environment variable")
 
@@ -76,11 +84,23 @@ class OpenAICLI:
                 "content": self.system_prompt
             })
 
+    def reset(self):
+        self.conversation_history = []
+        if self.system_prompt:
+            self.conversation_history.append({
+                "role": "system",
+                "content": self.system_prompt
+            })
+
     def chat(self):
         print("OpenAI CLI - Type 'exit' to end the conversation")
         
         while True:
-                user_input = input(f"\n{self.user_prompt}")
+                transcription = Asr.transcribe_audio_file(recorder.record_continuously(),client=asr_api)
+                user_input = str(transcription.text)
+                if user_input == '':
+                    continue
+                print(f"\n{self.user_prompt}: {user_input}")
                 if user_input.lower() in ['exit', 'quit']:
                     break
                 
@@ -101,17 +121,26 @@ class OpenAICLI:
                 
                 server_command = extract_server_command(ai_response)
                 execute_server_command(server_command)
-                
-                self.conversation_history.append({
-                    "role": "assistant",
-                    "content": ai_response
-                })
+
+                if server_command.startswith('+finish'):
+                    self.conversation_history = []
+                    if self.system_prompt:
+                        self.conversation_history.append({
+                            "role": "system",
+                            "content": self.system_prompt
+                        }) 
+                else:  
+                    self.conversation_history.append({
+                        "role": "assistant",
+                        "content": ai_response
+                    })
+
                 
 
 if __name__ == "__main__":
     try:
         subprocess.Popen(['start', 'python', 'Cashier.py'], shell=True)
-        cli = OpenAICLI()
+        cli = OpenAICLI(deepseek_api)   
         cli.chat()
     except ValueError as e:
         print(e)
