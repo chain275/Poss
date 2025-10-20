@@ -3,13 +3,6 @@ import time,subprocess
 from openai import OpenAI
 from ASR import Recorder,Asr
 
-key1 = str(input('LLM Api key: '))
-key2 = str(input('ASR Api key: '))
-
-
-deepseek_api = OpenAI(api_key=key1, base_url="https://api.deepseek.com")
-asr_api = OpenAI(api_key=key2,base_url="https://api.opentyphoon.ai/v1")
-
 location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')   
 recorder = Recorder.SentenceRecorder(silence_threshold=1000,pause_duration=1.75,sample_rate=44100,output_dir="recordings")
 
@@ -60,7 +53,7 @@ def execute_server_command(command):
 
 
 class OpenAICLI:
-    def __init__(self,deepseek_api):
+    def __init__(self,deepseek_api,asr_api):
         if not os.path.exists("Server"):
             os.makedirs("Server")
         self.client = deepseek_api
@@ -72,6 +65,7 @@ class OpenAICLI:
         self.ai_prompt = "Assistant: "
         self.temperature = 0.4
         self.model = "deepseek-chat"
+        self.asr = asr_api
         self.response_format={
         'type': 'json_object'
         }
@@ -96,7 +90,7 @@ class OpenAICLI:
         print("OpenAI CLI - Type 'exit' to end the conversation")
         
         while True:
-                transcription = Asr.transcribe_audio_file(recorder.record_continuously(),client=asr_api)
+                transcription = Asr.transcribe_audio_file(recorder.record_continuously(),client=self.asr)
                 user_input = str(transcription.text)
                 if user_input == '':
                     continue
@@ -140,7 +134,7 @@ class OpenAICLI:
 if __name__ == "__main__":
     try:
         subprocess.Popen(['start', 'python', 'Cashier.py'], shell=True)
-        cli = OpenAICLI(deepseek_api)   
+        cli = OpenAICLI()   
         cli.chat()
     except ValueError as e:
         print(e)
