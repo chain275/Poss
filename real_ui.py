@@ -21,7 +21,8 @@ class OrderDisplayApp:
         self.create_widgets()
         self.current_order_id = None
         self.current_items = []
-        #self.check_for_new_orders()
+        self.setup_order_watcher()
+        self.check_for_new_orders()
 
     def create_widgets(self):
         # -------------------------------------------HEADER------------------------------------------------------
@@ -68,6 +69,21 @@ class OrderDisplayApp:
         self.status.pack(side=tk.RIGHT, padx=20, pady=15)
         self.update_time()
 
+        self.items_frame = tk.Frame(self.order_frame,bg="#000000")
+        self.items_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        """ self.orderrrr = tk.Frame(self.order_frame, bg='#030712',height=150)
+        self.orderrrr.pack(fill=tk.X)
+        self.orderrrr.pack_propagate(False)
+
+        self.a = tk.Frame(self.orderrrr, bg=self.header_color,height=60,width=75)
+        self.a.pack(side=tk.LEFT,padx=(30,5), pady=15)
+        self.a.pack_propagate(False)
+
+        self.ee = tk.Label(self.a, text=f"99", font=(self.font, 30),fg="#000000",bg=self.header_color,)
+        self.ee.pack()
+
+        tk.Frame(self.order_frame, bg="#374151",height=1).pack(fill=tk.X) """
 
         # -------------------------------------------RIGHT------------------------------------------------------
 
@@ -85,8 +101,8 @@ class OrderDisplayApp:
         self.sub_total_label = tk.Label(self.sub_total_frame, text=f"SUBTOTAL", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
         self.sub_total_label.pack(side=tk.LEFT,padx=20, pady=25)
 
-        self.subtotal = tk.Label(self.sub_total_frame, text=f"$0000.00", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
-        self.subtotal.pack(side=tk.RIGHT,padx=20, pady=15)
+        self.subtotal_label = tk.Label(self.sub_total_frame, text=f"$0000.00", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
+        self.subtotal_label.pack(side=tk.RIGHT,padx=20, pady=15)
 
         tk.Frame(self.summary_frame, bg="#3d3d3d",height=5).pack(fill=tk.X,padx=20)
         tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=50).pack(fill=tk.X)
@@ -95,8 +111,8 @@ class OrderDisplayApp:
         self.Tax_frame = tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=50)
         self.Tax_frame.pack(fill=tk.X)
 
-        self.Tax_label = tk.Label(self.Tax_frame, text=f"TAX", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
-        self.Tax_label.pack(side=tk.LEFT,padx=20, pady=25)
+        self.tax_label = tk.Label(self.Tax_frame, text=f"TAX", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
+        self.tax_label.pack(side=tk.LEFT,padx=20, pady=25)
 
         self.Tax = tk.Label(self.Tax_frame, text=f"$0000.00", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
         self.Tax.pack(side=tk.RIGHT,padx=20, pady=25)
@@ -117,8 +133,8 @@ class OrderDisplayApp:
         self.yy = tk.Frame(self.Total_frame, bg="#16a34a", height=200)
         self.yy.pack(fill=tk.BOTH,padx=10,pady=(0, 10))
 
-        self.Total = tk.Label(self.yy, text=f"$0000.00", font=(self.font, 60),fg=self.primary_font_color,bg="#16a34a")
-        self.Total.pack(side=tk.LEFT,padx=20, pady=(0,10))
+        self.total_label = tk.Label(self.yy, text=f"$0000.00", font=(self.font, 60),fg=self.primary_font_color,bg="#16a34a")
+        self.total_label.pack(side=tk.LEFT,padx=20, pady=(0,10))
 
     def update_time(self):
         current_time = datetime.now().strftime("%I:%M:%S %p")
@@ -133,8 +149,130 @@ class OrderDisplayApp:
     
         self.root.after(1000, self.update_time)
 
+    def display_order(self, order_data):
+        self.clear_items_frame()
 
-root = tk.Tk()
-app = OrderDisplayApp(root)
-root.mainloop()
+        self.order_number_label.config(text=f'ORDER #{int(order_data.get("order_id", "--")):03d}')
 
+        for i, item in enumerate(order_data.get("items", [])):
+            if i % 2:
+                bg_color="#030712"
+            else:
+                bg_color='#000000'
+            item_frame = tk.Frame(self.items_frame, bg=bg_color, padx=10, pady=10)
+            item_frame.pack(fill=tk.X)
+
+            header_frame = tk.Frame(item_frame, bg=bg_color)
+            header_frame.pack(fill=tk.X)
+
+
+            a = tk.Frame(header_frame, bg=self.header_color,height=60,width=75)
+            a.pack(side=tk.LEFT,padx=(25,20))
+            a.pack_propagate(False)
+
+
+            tk.Label(a, text=item.get("quantity", 1), font=(self.font, 30),fg="#000000",bg=self.header_color,).pack()
+            
+            tk.Label(header_frame, text=item.get("item", "").upper(), font=(self.font, 24, "bold"), 
+                    fg="white", bg=bg_color, anchor="w").pack(side=tk.LEFT)
+            
+            tk.Label(header_frame, text=f"${item.get('total', 0):.2f}", font=(self.font, 28), 
+                    fg=self.primary_font_color, bg=bg_color).pack(side=tk.RIGHT)
+            
+
+
+    
+            
+            customizations = item.get("customizations", {})
+            for section, selections in customizations.items():
+                if isinstance(selections, list) and selections:
+                    custom_text = f"▸ {', '.join(selections)}"
+                    tk.Label(item_frame, text=custom_text, font=(self.font, 16), fg=self.header_color, 
+                           bg=bg_color, anchor="w").pack(fill=tk.X,padx=(120,20))
+                elif isinstance(selections, str) and selections != self.get_default_option(section, item.get("category", "")):
+                    custom_text = f"▸ {selections}"
+                    tk.Label(item_frame, text=custom_text, font=(self.font, 16), fg=self.header_color, 
+                           bg=bg_color, anchor="w").pack(fill=tk.X,padx=(120,20))
+
+            tk.Frame(self.items_frame, bg="#374151",height=2).pack(fill=tk.X)
+
+        
+        self.len_item_label.config(text=f"{sum(item['quantity'] for item in order_data['items'])} ITEMS")
+        self.subtotal_label.config(text=f"${order_data.get('subtotal', 0):.2f}")
+        self.Tax.config(text=f"${order_data.get('tax', 0):.2f}")
+        self.total_label.config(text=f"${order_data.get('total', 0):.2f}")
+
+        self.items_frame.update_idletasks()
+
+    def clear_items_frame(self):
+        for widget in self.items_frame.winfo_children():
+            widget.destroy()
+
+    def get_default_option(self, section, category):
+        default_options = {
+            "Size": "Regular",
+            "Ice": "Regular Ice",
+            "Extras": "No Extras",
+        }
+        return default_options.get(section, "")
+
+
+    def setup_order_watcher(self):
+        if not os.path.exists("temp"):
+            os.makedirs("temp")
+        
+        class OrderHandler(FileSystemEventHandler):
+            def __init__(self, app):
+                self.app = app
+            
+            def on_created(self, event):
+                if event.is_directory:
+                    return
+                if event.src_path.endswith(".json"):
+                    self.app.process_order_file(event.src_path)
+            
+            def on_modified(self, event):
+                if event.is_directory:
+                    return
+                if event.src_path.endswith(".json"):
+                    self.app.process_order_file(event.src_path)
+
+        self.event_handler = OrderHandler(self)
+        self.observer = Observer()
+        self.observer.schedule(self.event_handler, path="temp", recursive=False)
+        self.observer.start()
+    
+    def process_order_file(self, filepath):
+        try:
+            with open(filepath, 'r') as f:
+                order_data = json.load(f)
+                self.display_order(order_data)
+                self.current_order_id = order_data.get("order_id")
+        except Exception as e:
+            print(f"Error processing order file: {e}")
+    
+    def check_for_new_orders(self):
+        try:
+            order_files = [f for f in os.listdir("temp") if f.startswith("order_") and f.endswith(".json")]
+            if order_files:
+                order_files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
+                latest_order = order_files[-1]
+
+                order_id = int(latest_order.split('_')[1].split('.')[0])
+                if self.current_order_id is None or order_id > self.current_order_id:
+                    self.process_order_file(os.path.join("temp", latest_order))
+        except Exception as e:
+            print(f"Error checking for new orders: {e}")
+
+        self.root.after(500, self.check_for_new_orders)
+    
+    def on_closing(self):
+        self.observer.stop()
+        self.observer.join()
+        self.root.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = OrderDisplayApp(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    root.mainloop()
