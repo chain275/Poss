@@ -3,7 +3,7 @@ import time,subprocess
 from openai import OpenAI
 from ASR import Recorder,Asr
 
-location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')   
+location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')
 recorder = Recorder.SentenceRecorder(silence_threshold=1000,pause_duration=1.75,sample_rate=44100,output_dir="recordings")
 
 with open(location, 'r',encoding='utf-8') as file:
