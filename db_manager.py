@@ -80,7 +80,6 @@ class db_manager:
                 "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],
                 "Ice": ["Regular Ice", "Light Ice", "Extra Ice"],
                 "Sugar": ["50%", "70%", "100%"],
-                "Toppings": ["No Extras", "Cookies", "Bubble Pearl", "Coconut jelly", "Brown sugar jelly"]
             },
             "Fruit_tea": {
                 "Size": ["Regular size", "Large size (+$5)", "Extra Large size (+$10)"],

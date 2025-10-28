@@ -136,6 +136,26 @@ class FastFoodPOS:
                 return
         else:
             print("Invalid choice. Please try again.")
+
+    def add_item(self,item_id,category,item,selected_customizations,price,additional_cost,item_total,quantity = 1):
+        item_found = False
+        for i in self.current_order:
+            if item == i['item'] and selected_customizations == i['customizations']:
+                i['quantity'] += quantity
+                i['total'] += (item_total * quantity)
+                item_found = True
+                break
+        if not item_found:
+            self.current_order.append({
+                "id": item_id,
+                "category": category,
+                "item": item,
+                "customizations": selected_customizations.copy() if isinstance(selected_customizations, dict) else selected_customizations,  # Make a copy to avoid reference issues
+                "price": price,
+                "additional_cost": additional_cost,
+                "quantity": quantity,
+                "total": item_total * quantity,
+            })
     
     def customize_item(self, category, item, price):
         """Allow customization of a selected item"""
@@ -152,34 +172,7 @@ class FastFoodPOS:
                 
                 if section == "Toppings":
                     # Multiple selections
-                    selected_customizations[section] = []
-                    
-                    
-                    # Show current selections
-                    print(f"Current selections: {', '.join(selected_customizations[section]) if selected_customizations[section] else 'None'}")
-                    
-                    while True:
-                        for idx, option in enumerate(options, 1):
-                            status = "[X]" if option in selected_customizations[section] else "[ ]"
-                            print(f"{idx}. {status} {option}")
-                        
-                        print("0. Done with toppings")
-                        
-                        choice = input(f"Toggle topping (0-{len(options)}): ")
-                        if choice.isdigit():
-                            choice = int(choice)
-                            if 1 <= choice <= len(options):
-                                option = options[choice-1]
-                                if option in selected_customizations[section]:
-                                    selected_customizations[section].remove(option)
-                                else:
-                                    selected_customizations[section].append(option)
-                                # Show updated selections
-                                print(f"Current selections: {', '.join(selected_customizations[section]) if selected_customizations[section] else 'None'}")
-                            elif choice == 0:
-                                break
-                        else:
-                            print("Invalid choice. Please try again.")
+                    pass
                 else:
                     # Single selection
                     for idx, option in enumerate(options, 1):
@@ -225,15 +218,7 @@ class FastFoodPOS:
         if confirm == 'y':
             # Add to order
             item_id = len(self.current_order) + 1
-            self.current_order.append({
-                "id": item_id,
-                "category": category,
-                "item": item,
-                "customizations": selected_customizations,
-                "price": price,
-                "additional_cost": additional_cost,
-                "total": item_total
-            })
+            self.add_item(item_id,category,item,selected_customizations,price,additional_cost,item_total)
             
             print(f"\n{item} added to order!")
             self.update_order_summary()
@@ -327,39 +312,13 @@ class FastFoodPOS:
                         if sugar_code in self.Sugar_shortcuts:
                             selected_customizations["Sugar"] = self.Sugar_shortcuts[sugar_code]
 
-                # Process toppings (arg4)
-                '''if topping:
-                    selected_customizations["Toppings"] = [] # Default
-                    if len(parts) > 5:
-                        topping_codes = parts[5]
-                        available_toppings = self.ingredients["Milk_tea"]["Toppings"]
-                        
-                        # Map single letters to toppings
-                        topping_map = {
-                            "C": "Cookies",
-                            "B": "Bubble Pearl",
-                            "C": "Coconut jelly",
-                            "S": "Brown sugar jelly",
-                        }
-                        
-                        for code in topping_codes:
-                            if code in topping_map and topping_map[code] in available_toppings:
-                                selected_customizations["Toppings"].append(topping_map[code])'''
                 
                 # Calculate total price
                 item_total = item_price + additional_cost
                 
                 # Add to order
                 item_id = len(self.current_order) + 1
-                self.current_order.append({
-                    "id": item_id,
-                    "category": item_category,
-                    "item": item_name,
-                    "customizations": selected_customizations,
-                    "price": item_price,
-                    "additional_cost": additional_cost,
-                    "total": item_total
-                })
+                self.add_item(item_id,category,item_name,selected_customizations,item_price,additional_cost,item_total)
 
                 self.server_send.append({"id": item_id,"itemname": f"{parts[1]} {parts[2]} {parts[3]} {parts[4]} {parts[5]}",})
                 
@@ -396,7 +355,7 @@ class FastFoodPOS:
         print("Format: +add <item_name> <size> <ice> <toppings> <Sugar>")
         print("\nItem Name: Must match exactly (e.g., Classical_milk_tea)")
         
-        print("\Size Codes:")
+        print("\nSize Codes:")
         for code, size in self.Size_shortcuts.items():
             print(f"  {code} - {size}")
         
@@ -404,13 +363,7 @@ class FastFoodPOS:
         for code, ice in self.Ice_shortcuts.items():
             print(f"  {code} - {ice}")
         
-        print("\nTopping Codes (can combine multiple):")
-        print("  C - Cookies")
-        print("  B - Bubble Pearl")
-        print("  C - Coconut jelly")
-        print("  S - Brown sugar jelly")
-        
-        print("\nSauce Codes:")
+        print("\nSugar Codes:")
         for code, sugar in self.Sugar_shortcuts.items():
             print(f"  {code} - {sugar}")
         
@@ -429,7 +382,7 @@ class FastFoodPOS:
         print("="*50)
         
         for idx, item in enumerate(self.current_order, 1):
-            print(f"{idx}. {item['item']} - ${item['total']:.2f}")
+            print(f"{idx}. {item['quantity']}x {item['item']} - ${item['total']:.2f}")
             
             # Display customizations
             if 'customizations' in item:
@@ -501,7 +454,7 @@ class FastFoodPOS:
             self.current_order = []
             print("\nOrder cleared successfully!")
             self.update_order_summary()
-    
+
     def update_order_summary(self):
         """Update order totals"""
         self.subtotal = sum(item["total"] for item in self.current_order)
@@ -664,6 +617,9 @@ class FastFoodPOS:
                     time.sleep(1)  # Give the thread time to clean up
                     self.running = False
                     print("\nExiting POS system. Thank you!")
+
+            elif choice == 'debug':
+                print(self.current_order)
             else:
                 os.system('cls')
                 print("Invalid choice. Please try again.")
