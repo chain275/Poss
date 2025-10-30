@@ -8,7 +8,12 @@ class OrderDisplayApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Customer Order Display")
-        self.root.geometry("1920x1080")
+        
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        self.scale_factor = min(screen_width / 1920, screen_height / 1080)
+        
+        self.root.geometry(f"{screen_width}x{screen_height}")
         self.root.configure(bg="#FDFDFD")
 
         self.header_color = "#FFAE00"
@@ -24,21 +29,26 @@ class OrderDisplayApp:
         self.setup_order_watcher()
         self.check_for_new_orders()
 
+    def scale(self, value):
+        """Scale a pixel value based on screen resolution"""
+        return int(value * self.scale_factor)
+
     def create_widgets(self):
         # -------------------------------------------HEADER------------------------------------------------------
-        self.header_frame = tk.Frame(self.root, bg=self.header_color, height=120)
+        self.header_frame = tk.Frame(self.root, bg=self.header_color, height=self.scale(120))
         self.header_frame.pack(fill=tk.X)
         self.header_frame.pack_propagate(False)
 
-        self.logo_label = tk.Label(self.header_frame, text="🍹 Kmitl Drive-Thru", font=(self.font, 32, "bold"),fg=self.primary_font_color,bg=self.header_color)
+        self.logo_label = tk.Label(self.header_frame, text="🍹 Kmitl Drive-Thru", 
+                                   font=(self.font, self.scale(32), "bold"),
+                                   fg=self.primary_font_color,bg=self.header_color)
 
-        self.logo_label.pack(side=tk.LEFT, padx=20, pady=15)
+        self.logo_label.pack(side=tk.LEFT, padx=self.scale(20), pady=self.scale(15))
 
-        self.time_label = tk.Label(self.header_frame, font=(self.font, 22), fg="white", bg=self.header_color)
-        self.time_label.pack(side=tk.RIGHT, padx=20, pady=15)
-        tk.Frame(self.root, bg="#E69D00", height=5).pack(fill=tk.X)
-
-
+        self.time_label = tk.Label(self.header_frame, font=(self.font, self.scale(22)), 
+                                   fg="white", bg=self.header_color)
+        self.time_label.pack(side=tk.RIGHT, padx=self.scale(20), pady=self.scale(15))
+        tk.Frame(self.root, bg="#E69D00", height=self.scale(5)).pack(fill=tk.X)
 
         # -------------------------------------------Body------------------------------------------------------
         self.content_frame = tk.Frame(self.root, bg="#374151")
@@ -49,92 +59,103 @@ class OrderDisplayApp:
         self.order_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         # Header
-        
-        self.header_order_frame = tk.Frame(self.order_frame, bg=self.header_order_color, height=100)
+        self.header_order_frame = tk.Frame(self.order_frame, bg=self.header_order_color, 
+                                          height=self.scale(100))
         self.header_order_frame.pack(fill=tk.X)
         self.header_order_frame.pack_propagate(False)
 
-        tk.Frame(self.order_frame, bg=self.header_color, height=3).pack(fill=tk.X)
+        tk.Frame(self.order_frame, bg=self.header_color, height=self.scale(3)).pack(fill=tk.X)
 
-        self.order_number_frame = tk.Frame(self.header_order_frame , bg=self.header_order_color, width=20)
-        self.order_number_frame.pack(side=tk.LEFT,padx=10)
+        self.order_number_frame = tk.Frame(self.header_order_frame, bg=self.header_order_color, 
+                                          width=self.scale(20))
+        self.order_number_frame.pack(side=tk.LEFT,padx=self.scale(10))
 
-        self.order_number_label = tk.Label(self.order_number_frame, text=f"ORDER #000", font=(self.font, 24),fg=self.sec_font_color,bg=self.header_color,)
-        self.order_number_label.pack(side=tk.LEFT, padx=(20,5), pady=15)
+        self.order_number_label = tk.Label(self.order_number_frame, text=f"ORDER #000", 
+                                          font=(self.font, self.scale(24)),
+                                          fg=self.sec_font_color,bg=self.header_color)
+        self.order_number_label.pack(side=tk.LEFT, padx=(self.scale(20),self.scale(5)), 
+                                     pady=self.scale(15))
 
-        self.len_item_label = tk.Label(self.header_order_frame, text=f"0 ITEMS", font=(self.font, 20),fg=self.header_color,bg=self.header_order_color)
-        self.len_item_label.pack(side=tk.LEFT, padx=20, pady=15)
+        self.len_item_label = tk.Label(self.header_order_frame, text=f"0 ITEMS", 
+                                      font=(self.font, self.scale(20)),
+                                      fg=self.header_color,bg=self.header_order_color)
+        self.len_item_label.pack(side=tk.LEFT, padx=self.scale(20), pady=self.scale(15))
 
-        self.status = tk.Label(self.header_order_frame, text=f"● PROCESSING", font=(self.font, 16),fg="#33ff00",bg=self.header_order_color,)
-        self.status.pack(side=tk.RIGHT, padx=20, pady=15)
+        self.status = tk.Label(self.header_order_frame, text=f"● PROCESSING", 
+                              font=(self.font, self.scale(16)),
+                              fg="#33ff00",bg=self.header_order_color)
+        self.status.pack(side=tk.RIGHT, padx=self.scale(20), pady=self.scale(15))
         self.update_time()
 
         self.items_frame = tk.Frame(self.order_frame,bg="#000000")
         self.items_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        """ self.orderrrr = tk.Frame(self.order_frame, bg='#030712',height=150)
-        self.orderrrr.pack(fill=tk.X)
-        self.orderrrr.pack_propagate(False)
-
-        self.a = tk.Frame(self.orderrrr, bg=self.header_color,height=60,width=75)
-        self.a.pack(side=tk.LEFT,padx=(30,5), pady=15)
-        self.a.pack_propagate(False)
-
-        self.ee = tk.Label(self.a, text=f"99", font=(self.font, 30),fg="#000000",bg=self.header_color,)
-        self.ee.pack()
-
-        tk.Frame(self.order_frame, bg="#374151",height=1).pack(fill=tk.X) """
-
         # -------------------------------------------RIGHT------------------------------------------------------
-
         self.summary_frame_color = "#030712"
-        self.summary_frame = tk.Frame(self.content_frame, bg=self.summary_frame_color, width=600)
-        self.summary_frame.pack(side=tk.RIGHT, fill=tk.BOTH,padx=3)
+        self.summary_frame = tk.Frame(self.content_frame, bg=self.summary_frame_color, 
+                                     width=self.scale(600))
+        self.summary_frame.pack(side=tk.RIGHT, fill=tk.BOTH,padx=self.scale(3))
         self.summary_frame.pack_propagate(False)
 
-        tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=100).pack(fill=tk.X)
+        tk.Frame(self.summary_frame, bg=self.summary_frame_color, 
+                height=self.scale(100)).pack(fill=tk.X)
 
-        self.sub_total_frame = tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=50)
+        self.sub_total_frame = tk.Frame(self.summary_frame, bg=self.summary_frame_color, 
+                                       height=self.scale(50))
         self.sub_total_frame.pack(fill=tk.X)
 
-        
-        self.sub_total_label = tk.Label(self.sub_total_frame, text=f"SUBTOTAL", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
-        self.sub_total_label.pack(side=tk.LEFT,padx=20, pady=25)
+        self.sub_total_label = tk.Label(self.sub_total_frame, text=f"SUBTOTAL", 
+                                       font=(self.font, self.scale(28)),
+                                       fg=self.primary_font_color,bg=self.summary_frame_color)
+        self.sub_total_label.pack(side=tk.LEFT,padx=self.scale(20), pady=self.scale(25))
 
-        self.subtotal_label = tk.Label(self.sub_total_frame, text=f"$0000.00", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
-        self.subtotal_label.pack(side=tk.RIGHT,padx=20, pady=15)
+        self.subtotal_label = tk.Label(self.sub_total_frame, text=f"$0000.00", 
+                                      font=(self.font, self.scale(28)),
+                                      fg=self.primary_font_color,bg=self.summary_frame_color)
+        self.subtotal_label.pack(side=tk.RIGHT,padx=self.scale(20), pady=self.scale(15))
 
-        tk.Frame(self.summary_frame, bg="#3d3d3d",height=5).pack(fill=tk.X,padx=20)
-        tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=50).pack(fill=tk.X)
+        tk.Frame(self.summary_frame, bg="#3d3d3d",height=self.scale(5)).pack(fill=tk.X,
+                                                                             padx=self.scale(20))
+        tk.Frame(self.summary_frame, bg=self.summary_frame_color, 
+                height=self.scale(50)).pack(fill=tk.X)
 
-
-        self.Tax_frame = tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=50)
+        self.Tax_frame = tk.Frame(self.summary_frame, bg=self.summary_frame_color, 
+                                 height=self.scale(50))
         self.Tax_frame.pack(fill=tk.X)
 
-        self.tax_label = tk.Label(self.Tax_frame, text=f"TAX", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
-        self.tax_label.pack(side=tk.LEFT,padx=20, pady=25)
+        self.tax_label = tk.Label(self.Tax_frame, text=f"TAX", 
+                                 font=(self.font, self.scale(28)),
+                                 fg=self.primary_font_color,bg=self.summary_frame_color)
+        self.tax_label.pack(side=tk.LEFT,padx=self.scale(20), pady=self.scale(25))
 
-        self.Tax = tk.Label(self.Tax_frame, text=f"$0000.00", font=(self.font, 28),fg=self.primary_font_color,bg=self.summary_frame_color,)
-        self.Tax.pack(side=tk.RIGHT,padx=20, pady=25)
+        self.Tax = tk.Label(self.Tax_frame, text=f"$0000.00", 
+                           font=(self.font, self.scale(28)),
+                           fg=self.primary_font_color,bg=self.summary_frame_color)
+        self.Tax.pack(side=tk.RIGHT,padx=self.scale(20), pady=self.scale(25))
 
-        tk.Frame(self.summary_frame, bg="#3d3d3d",height=5).pack(fill=tk.X,padx=20)
-        tk.Frame(self.summary_frame, bg=self.summary_frame_color, height=150).pack(fill=tk.X)
+        tk.Frame(self.summary_frame, bg="#3d3d3d",height=self.scale(5)).pack(fill=tk.X,
+                                                                             padx=self.scale(20))
+        tk.Frame(self.summary_frame, bg=self.summary_frame_color, 
+                height=self.scale(150)).pack(fill=tk.X)
 
-        self.Total_frame = tk.Frame(self.summary_frame, bg='#22c55e', height=200)
-        self.Total_frame.pack(fill=tk.X,padx=20)
+        self.Total_frame = tk.Frame(self.summary_frame, bg='#22c55e', height=self.scale(200))
+        self.Total_frame.pack(fill=tk.X,padx=self.scale(20))
 
-        self.xx = tk.Frame(self.Total_frame, bg="#16a34a", height=200)
-        self.xx.pack(fill=tk.BOTH,padx=10,pady=(10, 0))
+        self.xx = tk.Frame(self.Total_frame, bg="#16a34a", height=self.scale(200))
+        self.xx.pack(fill=tk.BOTH,padx=self.scale(10),pady=(self.scale(10), 0))
 
-        self.Total_label = tk.Label(self.xx, text=f"TOTAL", font=(self.font, 28),fg=self.primary_font_color,bg="#16a34a")
-        self.Total_label.pack(side=tk.LEFT,padx=15, pady=(10,0))
+        self.Total_label = tk.Label(self.xx, text=f"TOTAL", 
+                                   font=(self.font, self.scale(28)),
+                                   fg=self.primary_font_color,bg="#16a34a")
+        self.Total_label.pack(side=tk.LEFT,padx=self.scale(15), pady=(self.scale(10),0))
 
+        self.yy = tk.Frame(self.Total_frame, bg="#16a34a", height=self.scale(200))
+        self.yy.pack(fill=tk.BOTH,padx=self.scale(10),pady=(0, self.scale(10)))
 
-        self.yy = tk.Frame(self.Total_frame, bg="#16a34a", height=200)
-        self.yy.pack(fill=tk.BOTH,padx=10,pady=(0, 10))
-
-        self.total_label = tk.Label(self.yy, text=f"$0000.00", font=(self.font, 60),fg=self.primary_font_color,bg="#16a34a")
-        self.total_label.pack(side=tk.LEFT,padx=20, pady=(0,10))
+        self.total_label = tk.Label(self.yy, text=f"$0000.00", 
+                                   font=(self.font, self.scale(60)),
+                                   fg=self.primary_font_color,bg="#16a34a")
+        self.total_label.pack(side=tk.LEFT,padx=self.scale(20), pady=(0,self.scale(10)))
 
     def update_time(self):
         current_time = datetime.now().strftime("%I:%M:%S %p")
@@ -159,44 +180,48 @@ class OrderDisplayApp:
                 bg_color="#030712"
             else:
                 bg_color='#000000'
-            item_frame = tk.Frame(self.items_frame, bg=bg_color, padx=10, pady=10)
+            item_frame = tk.Frame(self.items_frame, bg=bg_color, 
+                                 padx=self.scale(10), pady=self.scale(10))
             item_frame.pack(fill=tk.X)
 
             header_frame = tk.Frame(item_frame, bg=bg_color)
             header_frame.pack(fill=tk.X)
 
-
-            a = tk.Frame(header_frame, bg=self.header_color,height=60,width=75)
-            a.pack(side=tk.LEFT,padx=(25,20))
+            a = tk.Frame(header_frame, bg=self.header_color,
+                        height=self.scale(60),width=self.scale(75))
+            a.pack(side=tk.LEFT,padx=(self.scale(25),self.scale(20)))
             a.pack_propagate(False)
 
-
-            tk.Label(a, text=item.get("quantity", 1), font=(self.font, 30),fg="#000000",bg=self.header_color,).pack()
+            tk.Label(a, text=item.get("quantity", 1), 
+                    font=(self.font, self.scale(30)),
+                    fg="#000000",bg=self.header_color).pack()
             
-            tk.Label(header_frame, text=item.get("item", "").upper(), font=(self.font, 24, "bold"), 
+            tk.Label(header_frame, text=item.get("item", "").upper(), 
+                    font=(self.font, self.scale(24), "bold"), 
                     fg="white", bg=bg_color, anchor="w").pack(side=tk.LEFT)
             
-            tk.Label(header_frame, text=f"${item.get('total', 0):.2f}", font=(self.font, 28), 
+            tk.Label(header_frame, text=f"${item.get('line_total', 0):.2f}", 
+                    font=(self.font, self.scale(28)), 
                     fg=self.primary_font_color, bg=bg_color).pack(side=tk.RIGHT)
-            
 
-
-    
-            
             customizations = item.get("customizations", {})
             for section, selections in customizations.items():
                 if isinstance(selections, list) and selections:
                     custom_text = f"▸ {', '.join(selections)}"
-                    tk.Label(item_frame, text=custom_text, font=(self.font, 16), fg=self.header_color, 
-                           bg=bg_color, anchor="w").pack(fill=tk.X,padx=(120,20))
+                    tk.Label(item_frame, text=custom_text, 
+                           font=(self.font, self.scale(16)), fg=self.header_color, 
+                           bg=bg_color, anchor="w").pack(fill=tk.X,
+                                                         padx=(self.scale(120),self.scale(20)))
                 elif isinstance(selections, str) and selections != self.get_default_option(section, item.get("category", "")):
                     custom_text = f"▸ {selections}"
-                    tk.Label(item_frame, text=custom_text, font=(self.font, 16), fg=self.header_color, 
-                           bg=bg_color, anchor="w").pack(fill=tk.X,padx=(120,20))
+                    tk.Label(item_frame, text=custom_text, 
+                           font=(self.font, self.scale(16)), fg=self.header_color, 
+                           bg=bg_color, anchor="w").pack(fill=tk.X,
+                                                         padx=(self.scale(120),self.scale(20)))
 
-            tk.Frame(self.items_frame, bg="#374151",height=2).pack(fill=tk.X)
+            tk.Frame(self.items_frame, bg="#374151",
+                    height=self.scale(2)).pack(fill=tk.X)
 
-        
         self.len_item_label.config(text=f"{sum(item['quantity'] for item in order_data['items'])} ITEMS")
         self.subtotal_label.config(text=f"${order_data.get('subtotal', 0):.2f}")
         self.Tax.config(text=f"${order_data.get('tax', 0):.2f}")
@@ -215,7 +240,6 @@ class OrderDisplayApp:
             "Extras": "No Extras",
         }
         return default_options.get(section, "")
-
 
     def setup_order_watcher(self):
         if not os.path.exists("temp"):
