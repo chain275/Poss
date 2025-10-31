@@ -110,8 +110,8 @@ class db_manager:
 
         size_data = [
         ("R", "Regular size"),
-        ("L", "Large size (+$0.50)"),
-        ("EL", "Extra Large size (+$1.00)")
+        ("L", "Large size (+$5.0)"),
+        ("EL", "Extra Large size (+$10.00)")
         ]
 
         self.cursor.executemany('INSERT OR REPLACE INTO Size_shortcuts VALUES (?, ?)', size_data)

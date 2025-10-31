@@ -49,6 +49,8 @@ class FastFoodPOS:
     
     def start_ai_monitoring_thread(self):
         """Start a background thread to check for AI orders"""
+        if not os.path.exists("Server"):
+            os.makedirs("Server")
         path = os.path.join(os.getcwd(), "Server", "AI_order_command.txt")
         with open(path, 'w') as file:
             file.write("")
@@ -142,7 +144,7 @@ class FastFoodPOS:
         for i in self.current_order:
             if item == i['item'] and selected_customizations == i['customizations']:
                 i['quantity'] += quantity
-                i['total'] += (item_total * quantity)
+                i['line_total'] += (item_total * quantity)
                 item_found = True
                 break
         if not item_found:
@@ -154,7 +156,7 @@ class FastFoodPOS:
                 "price": price,
                 "additional_cost": additional_cost,
                 "quantity": quantity,
-                "total": item_total * quantity,
+                "line_total": item_total * quantity,
             })
     
     def customize_item(self, category, item, price):
@@ -382,7 +384,7 @@ class FastFoodPOS:
         print("="*50)
         
         for idx, item in enumerate(self.current_order, 1):
-            print(f"{idx}. {item['quantity']}x {item['item']} - ${item['total']:.2f}")
+            print(f"{idx}. {item['quantity']}x {item['item']} - ${item['line_total']:.2f}")
             
             # Display customizations
             if 'customizations' in item:
@@ -401,7 +403,7 @@ class FastFoodPOS:
         print(f"Total: ${total:.2f}")
         print("="*50)
     
-    def remove(self, choice):
+    def remove(self, choice,quantity = 1):
         """Remove an item from the order"""
         if not self.current_order:
             print("\nOrder is empty! There are no items to remove.")
@@ -412,15 +414,21 @@ class FastFoodPOS:
             choice = int(choice)
             if 1 <= choice <= len(self.current_order):
                 item = self.current_order[choice-1]
-                self.current_order.pop(choice-1)
-                print(f"\n{item['item']} removed from order.")
+                print(self.current_order)
+                item['quantity'] -= quantity
+                item['line_total'] -= item['price'] + item['additional_cost']
+                if item['quantity'] <= 0:
+                    self.current_order.pop(choice-1)
+                    print(f"\n{item['item']} removed from order.")
+
+                print(f"\nremoved {quantity} {item['item']} from order.")
                 self.update_order_summary()
             else:
                 print("Invalid item number.")
         else:
             print("Invalid choice. Please try again.")
             
-    def remove_item(self):
+    def remove_item(self,quantity = 1):
         """Remove an item from the order"""
         if not self.current_order:
             print("\nOrder is empty! There are no items to remove.")
@@ -433,8 +441,12 @@ class FastFoodPOS:
             choice = int(choice)
             if 1 <= choice <= len(self.current_order):
                 item = self.current_order[choice-1]
-                self.current_order.pop(choice-1)
-                print(f"\n{item['item']} removed from order.")
+                print(self.current_order)   
+                item['quantity'] -= quantity
+                if item['quantity'] <= 0:
+                    self.current_order.pop(choice-1)
+                    print(f"\n{item['item']} removed from order.")
+                print(f"\nremoved {quantity} {item['item']} from order.")
                 self.update_order_summary()
             elif choice == 0:
                 return
@@ -457,7 +469,7 @@ class FastFoodPOS:
 
     def update_order_summary(self):
         """Update order totals"""
-        self.subtotal = sum(item["total"] for item in self.current_order)
+        self.subtotal = sum(item["line_total"] for item in self.current_order)
         
         # Save temp order to file
         tax_amount = self.subtotal * self.tax_rate
@@ -527,7 +539,7 @@ class FastFoodPOS:
                 print("Invalid choice. Please try again.")
                 return
         
-        subtotal = sum(item["total"] for item in self.current_order)
+        subtotal = sum(item["line_total"] for item in self.current_order)
         tax_amount = subtotal * self.tax_rate
         total = subtotal + tax_amount
         
