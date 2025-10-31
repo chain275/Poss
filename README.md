@@ -18,9 +18,6 @@ Deepseek.py:
 db_manager.py:
 - สร้าง SQLite Database เพื่อใช้ในการเก็บข้อมูล เมนู ราคา
 
-
-
-
 ## Installation
 
 Install the required libraries using [uv](https://docs.astral.sh/uv/)
@@ -29,6 +26,12 @@ git clone https://github.com/yourusername/myproject.git
 cd myproject
 uv sync
 ```
+run the main.py
+```bash
+uv run python main.py
+```
+
+
 ## Requirement
 
 1. Deepseek api key
