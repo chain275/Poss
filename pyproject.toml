@@ -1,0 +1,14 @@
+[project]
+name = "poss"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "datetime>=5.5",
+    "google-cloud-texttospeech>=2.33.0",
+    "numpy>=2.3.4",
+    "openai>=2.6.1",
+    "pyaudio>=0.2.14",
+    "watchdog>=6.0.0",
+]
