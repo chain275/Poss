@@ -4,7 +4,6 @@ from openai import OpenAI
 from ASR import Recorder,Asr
 
 location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')
-recorder = Recorder.SentenceRecorder(silence_threshold=2000,pause_duration=1.75,sample_rate=44100,output_dir="recordings")
 
 with open(location, 'r',encoding='utf-8') as file:
     prompt = file.read()
@@ -22,11 +21,14 @@ def write_file_txt(text,mode):
 
 def json_loading(json_location):
     cur = dict()
-    with open(json_location,'r') as file:
-        a = json.load(file)
-    cur['items'] = (a['items'])
-    cur['Total'] = a["subtotal"]
-    return json.dumps(cur)
+    try:
+        with open(json_location,'r') as file:
+            a = json.load(file)
+        cur['items'] = a['items']
+        cur['Total'] = a["subtotal"]
+        return json.dumps(cur)
+    except:
+        return {}
 
 def Json_cleaning(Your_json):
     a = Your_json.replace("\n"," ")
@@ -73,9 +75,10 @@ class OpenAICLI:
         if not os.path.exists("Chat"):
             os.makedirs("Chat")
         self.current_order_json = os.path.join(os.getcwd(),'temp','temp.json')
-        if not os.path.exists(self.current_order_json):
-            with open(self.current_order_json, 'w+') as f:
-                f.write('{}')
+        with open(self.current_order_json, 'w+') as f:
+            json.dump({}, f)
+
+        self.recorder = Recorder.SentenceRecorder(silence_threshold=2000,pause_duration=1.75,sample_rate=44100,output_dir="recordings")
 
         self.client = deepseek_api
         if not self.client.api_key:
@@ -110,9 +113,8 @@ class OpenAICLI:
         print("OpenAI CLI - Type 'exit' to end the conversation")
         
         while True:
-                with open(self.current_order_json,'r') as f:
-                    current_order = json.load(f)
-                transcription = Asr.transcribe_audio_file(recorder.record_continuously(),client=self.asr)
+                current_order = json_loading(self.current_order_json)
+                transcription = Asr.transcribe_audio_file(self.recorder.record_continuously(),client=self.asr)
                 user_input = str(transcription.text)
                 if user_input == '':
                     continue
@@ -120,18 +122,16 @@ class OpenAICLI:
                 print(f"\n{self.user_prompt}: {user_input}")
                 if user_input.lower() in ['exit', 'quit']:
                     break
-                user_input = f"user_input : {user_input}\ncurrent_order : {current_order}"
+                new_user_input = f"user_input : {user_input}\ncurrent_order : {current_order}"
                 
-                self.conversation_history.append({"role": "user", "content": json.dumps(user_input)})
-
-                print('---------------------')
-                print(user_input)
-                print('---------------------')
+                self.conversation_history.append({"role": "user", "content": user_input})
+                modified = self.conversation_history[::]
+                modified[-1] = {"role": "user", "content": new_user_input}
                 
                 start_time = time.time()
                 response = self.client.chat.completions.create(
                     model=self.model,
-                    messages=self.conversation_history,
+                    messages=modified,
                     temperature=self.temperature,
                 )
 

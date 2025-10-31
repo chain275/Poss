@@ -76,8 +76,8 @@ Sugar = {
   - Example: `+add Starwberry_creamy_tea R L - / +add Mango_milk_tea EL E 50`
   - Example: `+add Kiwi_jasmin R L 70 / +add Kiwi_jasmin R L 70 / +add Kiwi_jasmin R L 70`
 
-- **+Remove <item_id>** - Remove items from cart
-  - Example: `+Remove 1`
+- **+Remove <item_id> <quantity>** - Remove items from cart
+  - Example: `+Remove 1 1`
   - Use / to separate multiple items
 
 - **+clear** - Remove all items from cart
