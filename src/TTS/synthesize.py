@@ -3,32 +3,11 @@ from google.cloud import texttospeech
 import os,time
 
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "warm-canto-453503-u3-e67ff607230a.json"
 
-
-def transcribe_audio(audio_file_path):
-    client = speech.SpeechClient()
-
-    with open(audio_file_path, "rb") as audio_file:
-        content = audio_file.read()
-
-    audio = speech.RecognitionAudio(content=content)
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=24000,
-        language_code="th-TH",
-    )
-
-    response = client.recognize(config=config, audio=audio)
-
-    for result in response.results:
-        print(f"Transcript: {result.alternatives[0].transcript}")
-        print(f"Confidence: {result.alternatives[0].confidence}")
-    
-    return response
 
 def synthesize_text(text, output_file=None, language_code="th-TH", 
-                    voice_name="th-TH-Chirp3-HD-Charon", speaking_rate=1.25,):
+                    voice_name="th-TH-Chirp3-HD-Autonoe", speaking_rate=1.25,):
     """
     Synthesizes speech from the input text.
     
@@ -67,3 +46,5 @@ def synthesize_text(text, output_file=None, language_code="th-TH",
 
     return output_file
 
+if __name__ == "__main__":
+    synthesize_text('สวัสดีค่ะ')

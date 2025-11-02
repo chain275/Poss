@@ -2,6 +2,8 @@ import os,json,datetime
 import time,subprocess
 from openai import OpenAI
 from ASR import Recorder,Asr
+from TTS import synthesize
+from playsound3 import playsound
 
 location = os.path.join(os.getcwd(),'prompt','Prompt_v1.txt')
 
@@ -75,7 +77,8 @@ class OpenAICLI:
         if not os.path.exists("Chat"):
             os.makedirs("Chat")
         self.current_order_json = os.path.join(os.getcwd(),'temp','temp.json')
-        with open(self.current_order_json, 'w+') as f:
+        with open(self.current_order_json, 'w') as f:
+            f.write('')
             json.dump({}, f)
 
         self.recorder = Recorder.SentenceRecorder(silence_threshold=2000,pause_duration=1.75,sample_rate=44100,output_dir="recordings")
@@ -141,6 +144,9 @@ class OpenAICLI:
                 print(f"\n{self.ai_prompt} ({elapsed_time:.2f}s): {ai_response}")
                 y = Json_cleaning(ai_response)
                 write_file_txt(y,'ai')
+                voice = synthesize.synthesize_text(y)
+                playsound(voice)
+
                 
                 server_command = extract_server_command(ai_response)
                 execute_server_command(server_command)
@@ -148,6 +154,8 @@ class OpenAICLI:
                 if server_command.startswith('+finish'):
                     if not os.path.exists("log"):
                         os.makedirs("log")
+                    with open(os.path.join(os.getcwd(),'log',datetime.now().strftime('%Y-%m-%d%H%M%S')),'w+') as f:
+                        json.dump(self.conversation_history, f, indent=2, default=str)
                     self.conversation_history = []
                     if self.system_prompt:
                         self.conversation_history.append({
