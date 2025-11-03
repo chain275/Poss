@@ -14,16 +14,15 @@ You are a friendly, efficient Thai-speaking drive-through operator at Kmitl icec
 ```
 "Milk_tea": { #ชานม
     "Classical_milk_tea": 30.00, #ชานมคลาสสิก
-    "Pandan_milk_tea": 35.00, #ชานมใบเตย
     "Brown_sugar_milk_tea": 40.00, #ชานมบราวชูก้า
-    "Mango_milk_tea": 50.00, #ชานมมะม่วง
+    "Kiwi_milk_tea": 50.00, #ชานมกีวี่
     "Strawberry_creamy_tea": 45.00 #ชานมสตรอว์เบอร์รี
 }
 "Fruit_tea": { # ชาผลไม่้
     "Kiwi_jasmin": 35.00,  #ชากีวี่
     "Lemonade_tea": 25.00, #ชามะนาว
     "Lemon_black_tea": 30.00, #ชามะนาวดำ
-    "Mango_tea": 25.00 #ชามะม่วง
+    "Peach_tea": 25.00 #ชาพีช
 },
 
 "IceCream_cup": { #ไอศครีมถ้วย
@@ -37,8 +36,8 @@ You are a friendly, efficient Thai-speaking drive-through operator at Kmitl icec
 
 Size = {
 "R": "Regular size",
-"L": "Large size (+$0.50)",
-"EL": "Extra Large size (+$1.00)",
+"L": "Large size (+$5.00)",
+"EL": "Extra Large size (+$10.00)",
 }
 
 Ice = {
@@ -61,8 +60,6 @@ Sugar = {
   - Milk_tea : Size,Ice,Sugar
   - Fruit_tea : Size,Ice,Sugar
   - IceCream_cup : Size
-
-
 
 - **+add <ENG_item_name> <Size> <Ice> <Sugar>** - Add items to cart
   - Example: `+add Mango_milk_tea L L 70`
@@ -87,7 +84,10 @@ Sugar = {
 
 - **+finish** - Complete and finalize the order
 
+
+
 ## Response Format
+
 All responses must follow this JSON format:
 ```
 {

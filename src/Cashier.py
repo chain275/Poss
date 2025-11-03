@@ -397,7 +397,8 @@ class FastFoodPOS:
         print(f"Subtotal: ${self.subtotal:.2f}")
         tax_amount = self.subtotal * self.tax_rate
         print(f"Tax ({int(self.tax_rate*100)}%): ${tax_amount:.2f}")
-        total = self.subtotal + tax_amount
+        total = self.subtotal
+        self.subtotal = total - tax_amount
         print(f"Total: ${total:.2f}")
         print("="*50)
     
@@ -471,7 +472,8 @@ class FastFoodPOS:
         
         # Save temp order to file
         tax_amount = self.subtotal * self.tax_rate
-        total = self.subtotal + tax_amount
+        total = self.subtotal
+        self.subtotal = total - tax_amount
         
         temp_order = {
             "order_id": self.order_id,
@@ -539,7 +541,8 @@ class FastFoodPOS:
         
         subtotal = sum(item["line_total"] for item in self.current_order)
         tax_amount = subtotal * self.tax_rate
-        total = subtotal + tax_amount
+        total = subtotal
+        subtotal = total - tax_amount
         
         if not auto_process:
             print(f"\nProcessing {payment_method} payment for ${total:.2f}...")

@@ -53,16 +53,15 @@ class db_manager:
         menu_data = {
             "Milk_tea": {
                 "Classical_milk_tea": 30.00,
-                "Pandan_milk_tea": 35.00,
                 "Brown_sugar_milk_tea": 40.00,
-                "Mango_milk_tea": 50.00,
+                "Kiwi_milk_tea": 50.00,
                 "Strawberry_creamy_tea": 45.00
             },
             "Fruit_tea": {
                 "Kiwi_jasmin": 35.00,
                 "Lemonade_tea": 25.00,
                 "Lemon_black_tea": 30.00,
-                "Mango_tea": 25.00
+                "Peach_tea": 25.00
             },
             "IceCream_cup": {
                 "Super_boba_sundae": 45.00,

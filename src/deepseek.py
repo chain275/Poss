@@ -22,13 +22,10 @@ def write_file_txt(text,mode):
                 file.write(text)
 
 def json_loading(json_location):
-    cur = dict()
     try:
         with open(json_location,'r') as file:
             a = json.load(file)
-        cur['items'] = a['items']
-        cur['Total'] = a["subtotal"]
-        return json.dumps(cur)
+        return a["total"]
     except:
         return {}
 
@@ -89,7 +86,7 @@ class OpenAICLI:
         self.system_prompt = prompt
         self.user_prompt = "Customer: "
         self.ai_prompt = "Assistant: "
-        self.temperature = 0.4
+        self.temperature = 0.3
         self.model = "deepseek-chat"
         self.asr = asr_api
         self.response_format={
@@ -125,16 +122,16 @@ class OpenAICLI:
                 print(f"\n{self.user_prompt}: {user_input}")
                 if user_input.lower() in ['exit', 'quit']:
                     break
-                new_user_input = f"user_input : {user_input}\ncurrent_order : {current_order}"
+                new_user_input = f"user_input : {user_input}\nTotal : {current_order}"
                 
                 self.conversation_history.append({"role": "user", "content": user_input})
-                modified = self.conversation_history[::]
-                modified[-1] = {"role": "user", "content": new_user_input}
+                """ modified = self.conversation_history[::]
+                modified[-1] = {"role": "user", "content": new_user_input} """
                 
                 start_time = time.time()
                 response = self.client.chat.completions.create(
                     model=self.model,
-                    messages=modified,
+                    messages=self.conversation_history,
                     temperature=self.temperature,
                 )
 
@@ -152,9 +149,14 @@ class OpenAICLI:
                 execute_server_command(server_command)
 
                 if server_command.startswith('+finish'):
+                    chat_location = os.path.join(os.getcwd(),'Chat')
+                    with open(os.path.join(chat_location,'Customer.txt'), 'w') as file:
+                        file.write('')
+                    with open(os.path.join(chat_location,'Ai.txt'), 'w') as file:
+                        file.write('')
                     if not os.path.exists("log"):
                         os.makedirs("log")
-                    with open(os.path.join(os.getcwd(),'log',datetime.now().strftime('%Y-%m-%d%H%M%S')),'w+') as f:
+                    with open(os.path.join(os.getcwd(),'log',datetime.datetime.now().strftime('%Y-%m-%d%H%M%S')),'w+') as f:
                         json.dump(self.conversation_history, f, indent=2, default=str)
                     self.conversation_history = []
                     if self.system_prompt:
